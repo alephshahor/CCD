@@ -114,20 +114,29 @@ while (dist > EPSILON and abs(prev-dist) > EPSILON/100.):
 
     if(effector_a_objet_mag > EPSILON):
         cos_theta = ((actual_a_effec_x * actual_a_objet_x) + (actual_a_effec_y * actual_a_objet_y)) / effector_a_objet_mag
-        sin_theta = ((actual_a_effec_x * actual_a_objet_x) - (actual_a_effec_y * actual_a_objet_y)) / effector_a_objet_mag
+
+        actual_a_effec = [actual_a_effec_x, actual_a_effec_y, 0]
+        actual_a_effec = [element / actual_a_effec_mag for element in actual_a_effec]
+
+        actual_a_objet = [actual_a_objet_x, actual_a_objet_y, 0]
+        actual_a_objet = [element / actual_a_objet_mag for element in actual_a_objet]
+        sin_theta = np.cross(actual_a_effec, actual_a_objet)[2]
+        sin_theta_2 = ((actual_a_effec_x * actual_a_objet_x) - (actual_a_effec_y * actual_a_objet_y)) / effector_a_objet_mag
     else:
         cos_theta = 1
         sin_theta = 0
 
     theta = acos(cos_theta)
 
-    print("Sin : ", sin_theta)
+    print("Sin1 : ", sin_theta)
+    print("Sin2 :", sin_theta_2)
     print("Theta: ", theta)
-    # Esta condicion da problemas
-        # if(sin_theta < 0.0):
-        #     theta = -theta
 
-    th[j] = theta
+#    Esta condicion da problemas
+    if(sin_theta < 0.0):
+        theta = -theta
+
+    th[j] += theta
     O[i+1] = cin_dir(th,a)
     j -= 1
 
