@@ -91,49 +91,71 @@ prev = 0.
 iteracion = 1
 while (dist > EPSILON and abs(prev-dist) > EPSILON/100.):
   prev = dist
-  # Para cada combinación de articulaciones:
   j = len(th) - 1
 
-  for i in range(len(th)): # 3 times.
+  for i in range(len(th)):
 
     print(O[i][j])
 
-    # cálculo de la cinemática inversa:
     pos_artic_actual = O[i][j]
     pos_effec_final = O[i][len(th)]
 
-    actual_a_effec_x = pos_effec_final[0] - pos_artic_actual[0]
-    actual_a_effec_y = pos_effec_final[1] - pos_artic_actual[1]
-    actual_a_effec_mag = sqrt(pow(actual_a_effec_x,2) + pow(actual_a_effec_y,2))
+    '''
+    La lógica que estamos usando es la siguiente:
 
-    actual_a_objet_x = objetivo[0] - pos_artic_actual[0]
-    actual_a_objet_y = objetivo[1] - pos_artic_actual[1]
-    actual_a_objet_mag = sqrt(pow(actual_a_objet_x,2) + pow(actual_a_objet_y,2))
+    Queremos obtener en primer lugar para cada articulación un ángulo theta
+    que permita acercar el efector final al punto objetivo.
+
+    Para ello debemos de calcular dos vectores:
+
+    * actual_a_effect --> Es el vector desde la articulación actual en la que
+    estamos iterando al efector final.
+
+    * actual_a_objet  --> Es el vector desde la articulación actual en la que
+    estamos iterando al punto objetivo.
+
+    El ángulo theta es calculado a partir del arcocoseno del mismo, que se obtendría
+    a partir de los dos vectores del siguiente modo:
+
+    cos_theta = (ae / |ae|) * (ao / |ao|)
+
+    Donde * simboliza el producto punto.
+
+    La dirección de giro del ángulo theta se calcular a partir del producto vectorial
+    de ambos vectores, este nos da un vector perpendicular al plano a partir del cual
+    siguiendo la regla de la mano derecha determinamos la dirección.
+
+    direccion = (ae / |ae|) x (ao / |ao|)
+
+    Donde x simboliza el producto vectorial.
+
+    '''
+
+    # Declaramos el vector desde la articulacion actual al efector final.
+    actual_a_effec = [0] * 2
+
+    actual_a_effec[0] = pos_effec_final[0] - pos_artic_actual[0]
+    actual_a_effec[1] = pos_effec_final[1] - pos_artic_actual[1]
+    actual_a_effec_mag = sqrt(pow(actual_a_effec[0],2) + pow(actual_a_effec[1],2))
+
+    # Declaramos el vector desde la articulación actual al punto objetivo.
+    actual_a_objet = [0] * 2
+
+    actual_a_objet[0] = objetivo[0] - pos_artic_actual[0]
+    actual_a_objet[1] = objetivo[1] - pos_artic_actual[1]
+    actual_a_objet_mag = sqrt(pow(actual_a_objet[0],2) + pow(actual_a_objet[1],2))
 
     effector_a_objet_mag = actual_a_effec_mag * actual_a_objet_mag
 
-    if(effector_a_objet_mag > EPSILON):
-        cos_theta = ((actual_a_effec_x * actual_a_objet_x) + (actual_a_effec_y * actual_a_objet_y)) / effector_a_objet_mag
+    actual_a_effec = [element / actual_a_effec_mag for element in actual_a_effec]
+    actual_a_objet = [element / actual_a_objet_mag for element in actual_a_objet]
 
-        actual_a_effec = [actual_a_effec_x, actual_a_effec_y, 0]
-        actual_a_effec = [element / actual_a_effec_mag for element in actual_a_effec]
-
-        actual_a_objet = [actual_a_objet_x, actual_a_objet_y, 0]
-        actual_a_objet = [element / actual_a_objet_mag for element in actual_a_objet]
-        sin_theta = np.cross(actual_a_effec, actual_a_objet)[2]
-        sin_theta_2 = ((actual_a_effec_x * actual_a_objet_x) - (actual_a_effec_y * actual_a_objet_y)) / effector_a_objet_mag
-    else:
-        cos_theta = 1
-        sin_theta = 0
+    cos_theta = np.dot(actual_a_effec, actual_a_objet)
+    direction_theta = np.cross(actual_a_effec, actual_a_objet)
 
     theta = acos(cos_theta)
 
-    print("Sin1 : ", sin_theta)
-    print("Sin2 :", sin_theta_2)
-    print("Theta: ", theta)
-
-#    Esta condicion da problemas
-    if(sin_theta < 0.0):
+    if(direction_theta < 0.0):
         theta = -theta
 
     th[j] += theta
