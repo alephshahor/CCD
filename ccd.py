@@ -53,6 +53,7 @@ def cin_dir(th,a):
   for i in range(len(th)):
     T = np.dot(T,matriz_T(0,th[i],a[i],0))
     tmp=np.dot(T,[0,0,0,1])
+    print("TEMP: " + str(tmp))
     o.append([tmp[0],tmp[1]])
   return o
 
@@ -145,7 +146,7 @@ while (dist > EPSILON and abs(prev-dist) > EPSILON/100.):
     actual_a_objet[1] = objetivo[1] - pos_artic_actual[1]
     actual_a_objet_mag = sqrt(pow(actual_a_objet[0],2) + pow(actual_a_objet[1],2))
 
-    effector_a_objet_mag = actual_a_effec_mag * actual_a_objet_mag
+    #effector_a_objet_mag = actual_a_effec_mag * actual_a_objet_mag
 
     actual_a_effec = [element / actual_a_effec_mag for element in actual_a_effec]
     actual_a_objet = [element / actual_a_objet_mag for element in actual_a_objet]
@@ -157,6 +158,8 @@ while (dist > EPSILON and abs(prev-dist) > EPSILON/100.):
 
     if(direction_theta < 0.0):
         theta = -theta
+
+    print("Theta: " + str(theta))
 
     th[j] += theta
     O[i+1] = cin_dir(th,a)
