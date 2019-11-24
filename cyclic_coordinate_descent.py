@@ -182,7 +182,7 @@ if len(sys.argv) != 3:
 target_position =[float(i) for i in sys.argv[1:]]
 
 robotic_arm = RoboticArm()
-robotic_arm.add_joint(RotationalJoint(0,0,0,90))
+robotic_arm.add_joint(PrismaticJoint(0,0,0,10))
 # robotic_arm.add_joint(RotationalJoint(5,0,0,90))
 robotic_arm.add_joint(PrismaticJoint(5,0,0,40))
 robotic_arm.add_joint(PrismaticJoint(10,0,0,10))
@@ -269,10 +269,19 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
     iteration += 1
 
 if actual_distance <= minimum_distance:
-    print("\nIterations to converge: " + str(iteration))
+    print("\nSuccessfully converged.")
+    print("Iterations to converge: " + str(iteration))
     print("---------------------------------------------------")
     print("Distance to the objective: " + str(actual_distance))
     print("Final joint values: \n")
     robotic_arm.show_joint_information()
+else:
+    print("\nCouldn't converge.")
+    print("Iterations: " + str(iteration))
+    print("---------------------------------------------------")
+    print("Distance to the objective: " + str(actual_distance))
+    print("Final joint values: \n")
+    robotic_arm.show_joint_information()
+
 
 robotic_arm.show_robotic_arm()
