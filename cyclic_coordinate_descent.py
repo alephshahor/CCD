@@ -183,8 +183,10 @@ target_position =[float(i) for i in sys.argv[1:]]
 
 robotic_arm = RoboticArm()
 robotic_arm.add_joint(RotationalJoint(0,0,0,90))
-robotic_arm.add_joint(RotationalJoint(5,0,0,90))
-robotic_arm.add_joint(PrismaticJoint(10,0,0,40))
+# robotic_arm.add_joint(RotationalJoint(5,0,0,90))
+robotic_arm.add_joint(PrismaticJoint(5,0,0,40))
+robotic_arm.add_joint(PrismaticJoint(10,0,0,10))
+# robotic_arm.add_joint(RotationalJoint(10,0,0,90))
 robotic_arm.add_end_point(15,0)
 robotic_arm.show_robotic_arm()
 direct_kinematics(robotic_arm)
@@ -247,10 +249,11 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
             v_effector_target[1] = target_position[1] - robotic_arm.end_point[1]
 
             joint_to_x_axis_angle = 0
-            for joint in robotic_arm.joints:
-                joint_to_x_axis_angle += joint.theta
+            for joint_ in robotic_arm.joints:
+                joint_to_x_axis_angle += joint_.theta
 
             effector_to_target_distance = np.dot([cos(joint_to_x_axis_angle),sin(joint_to_x_axis_angle)], v_effector_target)
+
             joint.theta = 0
             shift = joint.add_shift(effector_to_target_distance)
             robotic_arm.links[link] += shift
