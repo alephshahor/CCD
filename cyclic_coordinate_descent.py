@@ -76,6 +76,16 @@ class RotationalJoint(Joint):
         super().__init__(x,y,theta)
         self.max_angle = max_angle
 
+    def add_rotation(self, rotation_amount):
+        if(self.theta + rotation_amount >= self.max_angle):
+            offset = self.max_angle - self.theta
+            self.theta = self.max_angle
+            return offset
+        else:
+            self.theta += rotation_amount
+            return rotation_amount
+
+
     def show_information(self):
         print("Type: Rotational Joint")
         print("Position: " + "(" + str(self.x) + ", " + str(self.y) + ")")
@@ -112,22 +122,38 @@ class RoboticArm():
     # TODO: Fix range of the plot and final point.
     def show_robotic_arm(self):
         plt.figure(1)
-        plt.xlim(-10,20)
-        plt.ylim(-10,20)
+
+        min_x_value = self.joints[0].x;
+        max_x_value = min_x_value
+
+        min_y_value = self.joints[0].y;
+        max_y_value = min_x_value
+
 
         x_points = []
         for element in self.joints:
+            if(element.x < min_x_value):
+                min_x_value = element.x
+            if(element.x > max_x_value):
+                max_x_value = element.x
             x_points.append(element.x)
         x_points.append(self.end_point[0])
 
         y_points = []
         for element in self.joints:
+            if(element.y < min_y_value):
+                min_y_value = element.y
+            if(element.y > max_y_value):
+                max_y_value = element.y
             y_points.append(element.y)
         y_points.append(self.end_point[1])
 
+        plt.xlim(min(min_x_value, target_position[0]) - 10 , max(max_x_value, target_position[0]) + 10)
+        plt.ylim(min(min_y_value, target_position[1]) - 10 , max(max_y_value, target_position[1]) + 10)
+
         plt.plot(x_points, y_points, '-o', color="r")
         plt.plot(x_points[-1], y_points[-1], 's', color='b')
-        plt.plot(10,10, '-s', color="g")
+        plt.plot(target_position[0], target_position[1], '-s', color="g")
         plt.show()
         plt.clf()
 
@@ -153,9 +179,9 @@ if len(sys.argv) != 3:
 target_position =[float(i) for i in sys.argv[1:]]
 
 robotic_arm = RoboticArm()
-robotic_arm.add_joint(RotationalJoint(0,0,0,0))
-robotic_arm.add_joint(RotationalJoint(5,0,0,0))
-robotic_arm.add_joint(PrismaticJoint(10,0,0,5))
+robotic_arm.add_joint(RotationalJoint(0,0,0,radians(90)))
+robotic_arm.add_joint(RotationalJoint(5,0,0,radians(90)))
+robotic_arm.add_joint(PrismaticJoint(10,0,0,40))
 robotic_arm.add_end_point(15,0)
 robotic_arm.show_robotic_arm()
 direct_kinematics(robotic_arm)
@@ -206,7 +232,7 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
             if(direction_theta < 0.0):
                 theta = -theta
 
-            joint.theta += theta
+            joint.theta += joint.add_rotation(theta)
 
         elif(isinstance(joint, PrismaticJoint)):
 
