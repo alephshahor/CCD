@@ -52,8 +52,6 @@ class PrismaticJoint(Joint):
         self.current_shift = 0
         self.max_shift = max_shift
 
-    # El problema no es poder rotar negativamente sino rotar
-    # en dirección contraria a la que tiene
     def add_shift(self, shift_amount):
         if(shift_amount > 0):
             if(self.current_shift + shift_amount >= self.max_shift):
@@ -228,6 +226,9 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
             '''The cross product provides the cosine used to obtain the angle(theta) that the
                 joint needs to spin'''
             cos_theta = np.dot(v_joint_to_effector, v_joint_to_target)
+
+            # The value is clamped between (-1,1) to avoid floating point number problems with precision
+            cos_theta = max(min(cos_theta, 1), -1)
             theta = acos(cos_theta)
 
             '''The vectorial product provides a perpendicular vector z that specifies the direction
