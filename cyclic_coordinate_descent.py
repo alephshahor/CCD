@@ -40,7 +40,7 @@ class Joint(object):
     def __init__(self, x, y, theta):
         self.x = x
         self.y = y
-        self.theta = theta
+        self.theta = radians(theta)
 
 '''
 The PrismaticJoint class is a type of Joint.
@@ -52,20 +52,25 @@ class PrismaticJoint(Joint):
         self.current_shift = 0
         self.max_shift = max_shift
 
+    # El problema no es poder rotar negativamente sino rotar
+    # en dirección contraria a la que tiene
     def add_shift(self, shift_amount):
-        if(self.current_shift + shift_amount >= self.max_shift):
-            offset = self.max_shift - self.current_shift
-            self.current_shift = self.max_shift
-            return offset
+        if(shift_amount > 0):
+            if(self.current_shift + shift_amount >= self.max_shift):
+                offset = self.max_shift - self.current_shift
+                self.current_shift = self.max_shift
+                return offset
+            else :
+                self.current_shift += shift_amount
+                return shift_amount
         else:
-            self.current_shift += shift_amount
-            return shift_amount
+            return 0;
 
     def show_information(self):
-        print("Type: Prismatic Joint")
-        print("Position: " + "(" + str(self.x) + ", " + str(self.y) + ")")
-        print("Theta: " + str(self.theta))
-        print("Shift: " + str(self.current_shift))
+        print("\t-Type: Prismatic Joint")
+        print("\t-Position: " + "(" + str(round(self.x,3)) + ", " + str(round(self.y,3)) + ")")
+        print("\t-Theta: " + str(round(self.theta,3)) + " rad | " + str(round(degrees(self.theta),3)) + " deg.")
+        print("\t-Shift: " + str(self.current_shift) + "\n")
 
 '''
 The RotationalJoint class is a type of Joint.
@@ -74,7 +79,7 @@ It has a maximum rotation angle.
 class RotationalJoint(Joint):
     def __init__(self, x, y, theta, max_angle):
         super().__init__(x,y,theta)
-        self.max_angle = max_angle
+        self.max_angle = radians(max_angle)
 
     def add_rotation(self, rotation_amount):
         if(self.theta + rotation_amount >= self.max_angle):
@@ -87,9 +92,9 @@ class RotationalJoint(Joint):
 
 
     def show_information(self):
-        print("Type: Rotational Joint")
-        print("Position: " + "(" + str(self.x) + ", " + str(self.y) + ")")
-        print("Theta: " + str(self.theta))
+        print("\t-Type: Rotational Joint")
+        print("\t-Position: " + "(" + str(round(self.x,3)) + ", " + str(round(self.y,3)) + ")")
+        print("\t-Theta: " + str(round(self.theta,3)) + " rad | " + str(round(degrees(self.theta),3)) + " deg.\n")
 
 '''
 The Robotic arm class is composed by a series of joints connected
@@ -179,8 +184,8 @@ if len(sys.argv) != 3:
 target_position =[float(i) for i in sys.argv[1:]]
 
 robotic_arm = RoboticArm()
-robotic_arm.add_joint(RotationalJoint(0,0,0,radians(90)))
-robotic_arm.add_joint(RotationalJoint(5,0,0,radians(90)))
+robotic_arm.add_joint(RotationalJoint(0,0,0,90))
+robotic_arm.add_joint(RotationalJoint(5,0,0,90))
 robotic_arm.add_joint(PrismaticJoint(10,0,0,40))
 robotic_arm.add_end_point(15,0)
 robotic_arm.show_robotic_arm()
@@ -245,7 +250,7 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
                 joint_to_x_axis_angle += joint.theta
 
             effector_to_target_distance = np.dot([cos(joint_to_x_axis_angle),sin(joint_to_x_axis_angle)], v_effector_target)
-            joint.theta = joint_to_x_axis_angle
+            joint.theta = 0
             shift = joint.add_shift(effector_to_target_distance)
             robotic_arm.links[link] += shift
 
@@ -260,9 +265,10 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
     iteration += 1
 
 if actual_distance <= minimum_distance:
-    print("Iterations to converge: " + str(iteration))
+    print("\nIterations to converge: " + str(iteration))
+    print("---------------------------------------------------")
     print("Distance to the objective: " + str(actual_distance))
-    print("Final joint values: ")
+    print("Final joint values: \n")
     robotic_arm.show_joint_information()
 
 robotic_arm.show_robotic_arm()
