@@ -45,6 +45,11 @@ class Joint(object):
 '''
 The PrismaticJoint class is a type of Joint.
 It has a maximum shift value.
+    x: Position in the x-axis
+    y: Position in the y-axis
+    theta: Angle of the joint with respect to the previous. In this case
+           as the joint is prismatic it shouldn't spin by itself.
+    max_shift: The maximum amount of displacement.
 '''
 class PrismaticJoint(Joint):
     def __init__(self, x, y, theta, max_shift):
@@ -73,6 +78,12 @@ class PrismaticJoint(Joint):
 '''
 The RotationalJoint class is a type of Joint.
 It has a maximum rotation angle.
+    x: Position in the x-axis
+    y: Position in the y-axis
+    theta: Angle of the joint with respect to the previous. In this case
+           as the joint is prismatic it shouldn't spin by itself.
+    min_angle: Minimum angle that the Joint can have.
+    max_angle: Maximum angle that the Joint can have.
 '''
 class RotationalJoint(Joint):
     def __init__(self, x, y, theta, min_angle, max_angle):
