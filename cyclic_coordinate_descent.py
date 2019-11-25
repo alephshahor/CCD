@@ -75,14 +75,19 @@ The RotationalJoint class is a type of Joint.
 It has a maximum rotation angle.
 '''
 class RotationalJoint(Joint):
-    def __init__(self, x, y, theta, max_angle):
+    def __init__(self, x, y, theta, min_angle, max_angle):
         super().__init__(x,y,theta)
+        self.min_angle = radians(min_angle)
         self.max_angle = radians(max_angle)
 
     def add_rotation(self, rotation_amount):
         if(self.theta + rotation_amount >= self.max_angle):
             offset = self.max_angle - self.theta
             self.theta = self.max_angle
+            return offset
+        elif(self.theta + rotation_amount <= self.min_angle):
+            offset = self.min_angle - self.theta
+            self.theta = self.min_angle
             return offset
         else:
             self.theta += rotation_amount
@@ -177,14 +182,25 @@ class RoboticArm():
 ---------------------------------------------------------------------------------------------------------
 '''
 
-if len(sys.argv) != 3:
-  sys.exit("Usage: $python3 " + sys.argv[0] + " x y.\nWhere x and y are the target position of the robotic arm.")
-target_position =[float(i) for i in sys.argv[1:]]
+if len(sys.argv) < 3:
+  sys.exit("Usage: $python3 " + sys.argv[0] + " x y --verbose.\nWhere x and y are the target position of the robotic arm.\nVerbose option allows the user to see step by step of the execution.")
+target_position = [float(sys.argv[1]),float(sys.argv[2])]
+
+verbose = False
+
+if(len(sys.argv) > 3):
+    if(sys.argv[3] == '--verbose' or sys.argv[3] == '-v'):
+        verbose = True
+    else:
+        sys.exit("Usage: $python3 " + sys.argv[0] + " x y --verbose.\nWhere x and y are the target position of the robotic arm.\nVerbose option allows the user to see step by step of the execution.")
+
 
 robotic_arm = RoboticArm()
-robotic_arm.add_joint(PrismaticJoint(0,0,0,10))
-# robotic_arm.add_joint(RotationalJoint(5,0,0,90))
-robotic_arm.add_joint(PrismaticJoint(5,0,0,40))
+# robotic_arm.add_joint(PrismaticJoint(0,0,0,10))
+robotic_arm.add_joint(RotationalJoint(0,0,0,0,90))
+robotic_arm.add_joint(RotationalJoint(5,0,0,0,90))
+# robotic_arm.add_joint(RotationalJoint(10,0,0,0,90))
+# robotic_arm.add_joint(PrismaticJoint(5,0,0,40))
 robotic_arm.add_joint(PrismaticJoint(10,0,0,10))
 # robotic_arm.add_joint(RotationalJoint(10,0,0,90))
 robotic_arm.add_end_point(15,0)
@@ -262,7 +278,10 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
             raise Exception("Not recognized type of joint.")
 
         direct_kinematics(robotic_arm)
-        robotic_arm.show_robotic_arm()
+
+        if(verbose == True):
+            robotic_arm.show_robotic_arm()
+
         link -= 1
 
     actual_distance = calculate_distance(target_position, robotic_arm.end_point)
@@ -270,6 +289,7 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
 
 if actual_distance <= minimum_distance:
     print("\nSuccessfully converged.")
+    print("Epsilon threshold: " + str(minimum_distance))
     print("Iterations to converge: " + str(iteration))
     print("---------------------------------------------------")
     print("Distance to the objective: " + str(actual_distance))
@@ -277,6 +297,7 @@ if actual_distance <= minimum_distance:
     robotic_arm.show_joint_information()
 else:
     print("\nCouldn't converge.")
+    print("Epsilon threshold: " + str(minimum_distance))
     print("Iterations: " + str(iteration))
     print("---------------------------------------------------")
     print("Distance to the objective: " + str(actual_distance))
