@@ -205,16 +205,12 @@ if(len(sys.argv) > 3):
     else:
         sys.exit("Usage: $python3 " + sys.argv[0] + " x y --verbose.\nWhere x and y are the target position of the robotic arm.\nVerbose option allows the user to see step by step of the execution.")
 
-
+# RotationalJoint(x, y, theta, min_angle, max_angle)
+# PrismaticJoint(x, y, theta, max_shift)
 robotic_arm = RoboticArm()
-# robotic_arm.add_joint(PrismaticJoint(0,0,0,10))
-robotic_arm.add_joint(RotationalJoint(0,0,0,-90,90))
-# robotic_arm.add_joint(RotationalJoint(5,0,0,0,90))
-# robotic_arm.add_joint(RotationalJoint(10,0,0,0,90))
+robotic_arm.add_joint(RotationalJoint(0,0,0,-90,0))
 robotic_arm.add_joint(PrismaticJoint(5,0,0,40))
 robotic_arm.add_joint(RotationalJoint(10,0,0,0,90))
-#robotic_arm.add_joint(PrismaticJoint(10,0,0,15))
-# robotic_arm.add_joint(RotationalJoint(10,0,0,90))
 robotic_arm.add_end_point(15,0)
 robotic_arm.show_robotic_arm()
 direct_kinematics(robotic_arm)
@@ -224,9 +220,6 @@ actual_distance = float("inf")
 previous_distance = 0
 iteration = 1
 
-'''
-TODO: Ask why they're dividing by 100f
-'''
 while(actual_distance > minimum_distance and abs(previous_distance - actual_distance) > minimum_distance / 100.):
     previous_distance = actual_distance
 
