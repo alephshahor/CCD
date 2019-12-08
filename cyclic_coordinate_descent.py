@@ -16,7 +16,6 @@ def calculate_transformation_matrix(d, th, a, al):
              ,[      0,                0,                0,         1]
              ]
 
-''' TODO: If I wanted to do this better how should i modify the literal values?'''
 def direct_kinematics(robotic_arm):
     transformation_matrix = np.identity(4)
 
@@ -138,7 +137,6 @@ class RoboticArm():
                                                [self.joints[i+1].x, self.joints[i+1].y])
 
 
-    # TODO: Fix range of the plot and final point.
     def show_robotic_arm(self):
         plt.figure(1)
 
@@ -224,6 +222,7 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
     previous_distance = actual_distance
 
     link = len(robotic_arm.links) - 1
+    current_join = len(robotic_arm.joints) - 1
     for joint in reversed(robotic_arm.joints):
 
         if(isinstance(joint, RotationalJoint)):
@@ -270,11 +269,12 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
             v_effector_target[1] = target_position[1] - robotic_arm.end_point[1]
 
             joint_to_x_axis_angle = 0
-            for joint_ in robotic_arm.joints:
-                joint_to_x_axis_angle += joint_.theta
+
+            for i in range(current_join):
+                    joint_to_x_axis_angle += robotic_arm.joints[i].theta
 
             effector_to_target_distance = np.dot([cos(joint_to_x_axis_angle),sin(joint_to_x_axis_angle)], v_effector_target)
-
+            
             joint.theta = 0
             shift = joint.add_shift(effector_to_target_distance)
             robotic_arm.links[link] += shift
@@ -288,6 +288,7 @@ while(actual_distance > minimum_distance and abs(previous_distance - actual_dist
             robotic_arm.show_robotic_arm()
 
         link -= 1
+        current_join -= 1
 
     actual_distance = calculate_distance(target_position, robotic_arm.end_point)
     iteration += 1
